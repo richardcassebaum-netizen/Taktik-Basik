@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Taktik-Basis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: monospace;
+            background: #1e1e1e;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background: #2b2b2b;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.5em;
+        }
+
+        #game {
+            margin-top: 20px;
+            width: 90vw;
+            max-width: 600px;
+            border: 2px solid #444;
+            padding: 10px;
+            background: #111;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #555;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            background: #444;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #666;
+        }
+
+        .log {
+            margin-top: 10px;
+            font-size: 0.9em;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #1b1b1b;
+            padding: 10px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <header>Taktik-Basis: Runde <span id="round">1</span></header>
+    <div id="game">
+        <div class="status">
+            ⚡ Energie: <span id="energy">100</span> |
+            🪨 Materialien: <span id="materials">50</span> |
+            👥 Bevölkerung: <span id="population">5</span>
+        </div>
+        <div class="actions">
+            <button onclick="build('generator')">🔋 Generator bauen (20 M)</button>
+            <button onclick="build('barracks')">🏗️ Kaserne bauen (30 M)</button>
+            <button onclick="research()">🔬 Forschen (40 M)</button>
+            <button onclick="nextRound()">⏭️ Nächste Runde</button>
+        </div>
+        <div class="log" id="log">
+            Willkommen bei Taktik-Basis!
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            round: 1,
+            energy: 100,
+            materials: 50,
+            population: 5,
+            log: [],
+        };
+
+        function updateUI() {
+            document.getElementById('round').textContent = state.round;
+            document.getElementById('energy').textContent = state.energy;
+            document.getElementById('materials').textContent = state.materials;
+            document.getElementById('population').textContent = state.population;
+            document.getElementById('log').innerHTML = state.log.slice(-10).join('<br>');
+            saveGame();
+        }
+
+        function log(message) {
+            state.log.push("🔹 " + message);
+            updateUI();
+        }
+
+        function build(type) {
+            if (type === 'generator' && state.materials >= 20) {
+                state.materials -= 20;
+                state.energy += 20;
+                log("Generator gebaut: +20 Energie.");
+            } else if (type === 'barracks' && state.materials >= 30) {
+                state.materials -= 30;
+                state.population += 2;
+                log("Kaserne gebaut: +2 Bevölkerung.");
+            } else {
+                log("❌ Nicht genug Materialien.");
+            }
+        }
+
+        function research() {
+            if (state.materials >= 40) {
+                state.materials -= 40;
+                state.energy += 10;
+                log("Forschung abgeschlossen: Effizientere Energiegewinnung!");
+            } else {
+                log("❌ Forschung fehlgeschlagen – zu wenig Materialien.");
+            }
+        }
+
+        function nextRound() {
+            state.round++;
+            state.energy += 10;
+            state.materials += 5;
+            log("Neue Runde gestartet.");
+        }
+
+        function saveGame() {
+            localStorage.setItem("taktik_basis_save", JSON.stringify(state));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem("taktik_basis_save");
+            if (saved) {
+                state = JSON.parse(saved);
+            }
+        }
+
+        loadGame();
+        updateUI();
+    </script>
+</body>
+</html>
